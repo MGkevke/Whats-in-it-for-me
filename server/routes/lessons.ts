@@ -12,9 +12,70 @@ import {
   getStudentResponses,
   getAllLessons,
 } from "../db.js";
-import { callClaude } from "./ai.js";
+import { callClaude, isAiAvailable } from "./ai.js";
 
 const router = Router();
+
+// --- Mock data generators for when no API key is set ---
+
+function generateMockContent(subject: string, extraContext?: string) {
+  const ctx = extraContext ? ` ${extraContext}` : "";
+  return {
+    samenvatting: `${subject} is een fascinerend onderwerp dat centraal staat in deze les.${ctx}\n\nIn deze les verkennen we de kernconcepten, belangrijkste ontwikkelingen en praktische toepassingen van ${subject.toLowerCase()}. Je leert de basisprincipes begrijpen en kunt na de les de belangrijkste punten in eigen woorden uitleggen.`,
+    kaartjes: [
+      {
+        stelling: `${subject} is een onderwerp dat alleen theoretisch relevant is.`,
+        correct: false,
+        uitleg: `Onjuist. ${subject} heeft zowel theoretische als praktische toepassingen en is relevant voor het dagelijks leven.`,
+      },
+      {
+        stelling: `Bij ${subject.toLowerCase()} spelen meerdere factoren een rol die samen het geheel vormen.`,
+        correct: true,
+        uitleg: `Klopt! ${subject} is een complex onderwerp waarbij verschillende elementen samenkomen.`,
+      },
+      {
+        stelling: `${subject} is pas recent ontstaan en heeft geen historische wortels.`,
+        correct: false,
+        uitleg: `Onjuist. De meeste onderwerpen hebben diepe historische wortels en zijn door de tijd heen geëvolueerd.`,
+      },
+    ],
+  };
+}
+
+function generateMockFeedback(wishes: string[]) {
+  // Cluster similar wishes by simple word overlap
+  const clusters: Map<string, { texts: string[]; count: number }> = new Map();
+
+  for (const wish of wishes) {
+    let matched = false;
+    for (const [key, cluster] of clusters) {
+      const keyWords = key.toLowerCase().split(/\s+/);
+      const wishWords = wish.toLowerCase().split(/\s+/);
+      const overlap = keyWords.filter((w) => wishWords.includes(w) && w.length > 3);
+      if (overlap.length >= 1) {
+        cluster.texts.push(wish);
+        cluster.count++;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      clusters.set(wish, { texts: [wish], count: 1 });
+    }
+  }
+
+  const bulletpoints = Array.from(clusters.entries())
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 10)
+    .map(([_, cluster]) => ({
+      punt: cluster.texts[0],
+      aantal_studenten: cluster.count,
+    }));
+
+  return { bulletpoints };
+}
+
+// --- Routes ---
 
 // POST /api/lessons - Create a lesson
 router.post("/", async (req: Request, res: Response) => {
@@ -26,7 +87,6 @@ router.post("/", async (req: Request, res: Response) => {
       return;
     }
 
-    // Create the lesson in draft status first
     const lesson = createLesson({
       subject,
       course_name,
@@ -34,8 +94,9 @@ router.post("/", async (req: Request, res: Response) => {
       file_text,
     });
 
-    // Call Claude to generate summary and cards
-    const prompt = `Je bent een educatieve AI-assistent. Genereer het volgende op basis van het lesonderwerp en eventuele extra context:
+    if (isAiAvailable()) {
+      // Use real AI
+      const prompt = `Je bent een educatieve AI-assistent. Genereer het volgende op basis van het lesonderwerp en eventuele extra context:
 
 1. **Samenvatting**: Een ZEER korte samenvatting (max 150 woorden) van het lesonderwerp. Het doel is dat studenten in 60 seconden snappen WAAR de les over gaat. Gebruik simpele taal, geen jargon. Maak het visueel scanbaar met 1-2 korte paragrafen. Begin met één pakkende openingszin.
 
@@ -55,30 +116,32 @@ Antwoord in dit exacte JSON formaat:
   ]
 }`;
 
-    try {
-      const claudeResponse = await callClaude([
-        { role: "user", content: prompt },
-      ]);
-
-      // Extract JSON from the response (handle markdown code blocks)
-      const jsonMatch = claudeResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        const updatedLesson = updateLesson(lesson.id, {
-          summary: parsed.samenvatting,
-          cards_json: JSON.stringify(parsed.kaartjes),
-        });
-        res.json(updatedLesson);
-        return;
+      try {
+        const claudeResponse = await callClaude([
+          { role: "user", content: prompt },
+        ]);
+        const jsonMatch = claudeResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          const updatedLesson = updateLesson(lesson.id, {
+            summary: parsed.samenvatting,
+            cards_json: JSON.stringify(parsed.kaartjes),
+          });
+          res.json(updatedLesson);
+          return;
+        }
+      } catch (aiError) {
+        console.error("AI generation error:", aiError);
       }
-
-      // If we couldn't parse the response, return the lesson without AI content
-      res.json(lesson);
-    } catch (aiError) {
-      console.error("AI generation error:", aiError);
-      // Return the lesson even if AI fails - teacher can refine later
-      res.json(lesson);
     }
+
+    // Fallback: use mock data
+    const mock = generateMockContent(subject, extra_context);
+    const updatedLesson = updateLesson(lesson.id, {
+      summary: mock.samenvatting,
+      cards_json: JSON.stringify(mock.kaartjes),
+    });
+    res.json(updatedLesson);
   } catch (error) {
     console.error("Error creating lesson:", error);
     res.status(500).json({ error: "Failed to create lesson" });
@@ -97,7 +160,6 @@ router.get("/", (_req: Request, res: Response) => {
 });
 
 // GET /api/lessons/code/:code - Get lesson by code (for students)
-// NOTE: This must be defined BEFORE /:id to avoid "code" being matched as an id
 router.get("/code/:code", (req: Request, res: Response) => {
   try {
     const code = req.params.code as string;
@@ -169,13 +231,13 @@ router.post("/:id/chat", async (req: Request, res: Response) => {
     // Save the user message
     addChatMessage(lesson.id, "user", message);
 
-    // Get chat history
-    const chatMessages = getChatMessages(lesson.id);
-    const chatHistory = chatMessages
-      .map((m) => `${m.role === "user" ? "Docent" : "Assistent"}: ${m.content}`)
-      .join("\n");
+    if (isAiAvailable()) {
+      const chatMessages = getChatMessages(lesson.id);
+      const chatHistory = chatMessages
+        .map((m) => `${m.role === "user" ? "Docent" : "Assistent"}: ${m.content}`)
+        .join("\n");
 
-    const prompt = `Je bent een educatieve AI-assistent die een docent helpt met het verfijnen van lesmateriaal.
+      const prompt = `Je bent een educatieve AI-assistent die een docent helpt met het verfijnen van lesmateriaal.
 
 Huidige samenvatting:
 ${lesson.summary}
@@ -199,35 +261,35 @@ Antwoord in dit exacte JSON formaat:
   ]
 }`;
 
-    try {
-      const claudeResponse = await callClaude([
-        { role: "user", content: prompt },
-      ]);
-
-      const jsonMatch = claudeResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        const updatedLesson = updateLesson(lesson.id, {
-          summary: parsed.samenvatting,
-          cards_json: JSON.stringify(parsed.kaartjes),
-        });
-
-        // Save the assistant response
-        addChatMessage(lesson.id, "assistant", claudeResponse);
-
-        const messages = getChatMessages(lesson.id);
-        res.json({ lesson: updatedLesson, messages });
-        return;
+      try {
+        const claudeResponse = await callClaude([
+          { role: "user", content: prompt },
+        ]);
+        const jsonMatch = claudeResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          const updatedLesson = updateLesson(lesson.id, {
+            summary: parsed.samenvatting,
+            cards_json: JSON.stringify(parsed.kaartjes),
+          });
+          addChatMessage(lesson.id, "assistant", "Aanpassingen zijn doorgevoerd op basis van je feedback.");
+          const messages = getChatMessages(lesson.id);
+          res.json({ lesson: updatedLesson, messages });
+          return;
+        }
+      } catch (aiError) {
+        console.error("AI chat error:", aiError);
       }
-
-      // If parsing failed, still save the response
-      addChatMessage(lesson.id, "assistant", claudeResponse);
-      const messages = getChatMessages(lesson.id);
-      res.json({ lesson, messages });
-    } catch (aiError) {
-      console.error("AI chat error:", aiError);
-      res.status(500).json({ error: "Failed to get AI response" });
     }
+
+    // Mock fallback: just acknowledge the message
+    addChatMessage(
+      lesson.id,
+      "assistant",
+      "Begrepen! In de volledige versie zou ik de samenvatting en kaartjes nu aanpassen op basis van je feedback. (Demo modus — geen API key ingesteld)"
+    );
+    const messages = getChatMessages(lesson.id);
+    res.json({ lesson, messages });
   } catch (error) {
     console.error("Error in chat:", error);
     res.status(500).json({ error: "Failed to process chat message" });
@@ -278,7 +340,6 @@ router.get("/:id/stats", (req: Request, res: Response) => {
       return;
     }
 
-    // Aggregate card results
     const cardStats: Record<
       number,
       { understood: number; notUnderstood: number }
@@ -286,15 +347,11 @@ router.get("/:id/stats", (req: Request, res: Response) => {
 
     for (const response of responses) {
       if (!response.card_results_json) continue;
-
       try {
         const cardResults = JSON.parse(response.card_results_json);
         if (Array.isArray(cardResults)) {
           cardResults.forEach(
-            (
-              result: { cardIndex: number; correct: boolean },
-              index: number
-            ) => {
+            (result: { cardIndex: number; correct: boolean }, index: number) => {
               const cardIndex = result.cardIndex ?? index;
               if (!cardStats[cardIndex]) {
                 cardStats[cardIndex] = { understood: 0, notUnderstood: 0 };
@@ -370,33 +427,38 @@ router.get("/:id/feedback", async (req: Request, res: Response) => {
       return;
     }
 
-    const prompt = `Hier zijn de leerwensen van studenten voor het lesonderwerp "${lesson.subject}":
+    if (isAiAvailable()) {
+      const prompt = `Hier zijn de leerwensen van studenten voor het lesonderwerp "${lesson.subject}":
 ${allWishes.join("\n")}
 
 Maak een gerankte lijst van maximaal 10 bulletpoints die samenvatten wat studenten het meest willen leren. Cluster vergelijkbare wensen. Zet de meest genoemde/belangrijkste bovenaan. Houd het beknopt en actionable voor de docent. Geef bij elk punt aan hoeveel studenten iets vergelijkbaars noemden.
 
 Antwoord in JSON: { "bulletpoints": [{ "punt": "...", "aantal_studenten": N }] }`;
 
-    try {
-      const claudeResponse = await callClaude([
-        { role: "user", content: prompt },
-      ]);
-
-      const jsonMatch = claudeResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        res.json({
-          bulletpoints: parsed.bulletpoints,
-          totalResponses: responses.length,
-        });
-        return;
+      try {
+        const claudeResponse = await callClaude([
+          { role: "user", content: prompt },
+        ]);
+        const jsonMatch = claudeResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          res.json({
+            bulletpoints: parsed.bulletpoints,
+            totalResponses: responses.length,
+          });
+          return;
+        }
+      } catch (aiError) {
+        console.error("AI feedback error, falling back to mock:", aiError);
       }
-
-      res.json({ bulletpoints: [], totalResponses: responses.length });
-    } catch (aiError) {
-      console.error("AI feedback error:", aiError);
-      res.status(500).json({ error: "Failed to generate feedback" });
     }
+
+    // Mock fallback: cluster wishes locally
+    const mock = generateMockFeedback(allWishes);
+    res.json({
+      bulletpoints: mock.bulletpoints,
+      totalResponses: responses.length,
+    });
   } catch (error) {
     console.error("Error fetching feedback:", error);
     res.status(500).json({ error: "Failed to fetch feedback" });

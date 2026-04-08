@@ -2,6 +2,10 @@ import Anthropic from "@anthropic-ai/sdk";
 
 let client: Anthropic | null = null;
 
+function hasApiKey(): boolean {
+  return !!process.env.ANTHROPIC_API_KEY;
+}
+
 function getClient(): Anthropic {
   if (!client) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -18,6 +22,10 @@ function getClient(): Anthropic {
 export async function callClaude(
   messages: Array<{ role: string; content: string }>
 ): Promise<string> {
+  if (!hasApiKey()) {
+    throw new Error("NO_API_KEY");
+  }
+
   try {
     const anthropic = getClient();
 
@@ -44,4 +52,8 @@ export async function callClaude(
     }
     throw error;
   }
+}
+
+export function isAiAvailable(): boolean {
+  return hasApiKey();
 }
