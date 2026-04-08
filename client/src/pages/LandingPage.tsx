@@ -10,16 +10,12 @@ export default function LandingPage() {
   const handleDemo = async () => {
     setLoadingDemo(true)
     try {
-      const res = await fetch('/api/seed-demo', { method: 'POST' })
-      if (res.ok) {
-        navigate('/teacher/dashboard')
-      }
+      await fetch('/api/seed-demo', { method: 'POST' })
     } catch {
-      // If seed-demo endpoint doesn't exist, try navigating to dashboard anyway
-      navigate('/teacher/dashboard')
-    } finally {
-      setLoadingDemo(false)
+      // ignore - demo data might already exist
     }
+    setLoadingDemo(false)
+    navigate('/teacher/dashboard')
   }
 
   return (
