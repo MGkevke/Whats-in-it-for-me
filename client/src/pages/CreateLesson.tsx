@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, BookOpen, Tag, Upload, FileText, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, Tag, Upload, FileText, X, Loader2, Zap } from 'lucide-react'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Input from '../components/ui/Input'
@@ -68,32 +68,31 @@ export default function CreateLesson() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="min-h-screen px-4 py-8"
+      className="min-h-screen px-4 py-8 relative"
     >
+      <div className="absolute inset-0 -z-10 spot-decoration opacity-20" />
       <div className="max-w-2xl mx-auto">
         <motion.button
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-earth-400 hover:text-earth-600 mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Terug</span>
         </motion.button>
 
-        <motion.h1
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="text-3xl font-bold text-gray-900 mb-2"
-        >
-          Nieuwe les aanmaken
-        </motion.h1>
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cheetah-400 to-primary-500 flex items-center justify-center">
+            <Zap className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-earth-900">Nieuwe les aanmaken</h1>
+        </motion.div>
         <motion.p
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.15 }}
-          className="text-gray-500 mb-8"
+          className="text-earth-400 mb-8 ml-[52px]"
         >
           Vul de details in en laat AI je lesvoorbereiding genereren
         </motion.p>
@@ -125,27 +124,27 @@ export default function CreateLesson() {
               />
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Bestand uploaden</label>
+                <label className="block text-sm font-medium text-earth-700">Bestand uploaden</label>
                 {fileName ? (
-                  <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl border border-purple-100">
-                    <FileText className="w-5 h-5 text-purple-600" />
-                    <span className="text-sm text-purple-700 flex-1 truncate">{fileName}</span>
-                    <button type="button" onClick={() => { setFileName(''); setFileText('') }} className="text-gray-400 hover:text-gray-600">
+                  <div className="flex items-center gap-3 p-3 bg-cheetah-50 rounded-xl border border-cheetah-200/60">
+                    <FileText className="w-5 h-5 text-cheetah-600" />
+                    <span className="text-sm text-cheetah-700 flex-1 truncate">{fileName}</span>
+                    <button type="button" onClick={() => { setFileName(''); setFileText('') }} className="text-earth-400 hover:text-earth-600">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50/50 transition-colors cursor-pointer">
-                    {uploading ? <Loader2 className="w-8 h-8 text-purple-400 animate-spin mb-2" /> : <Upload className="w-8 h-8 text-gray-300 mb-2" />}
-                    <span className="text-sm text-gray-500">{uploading ? 'Bezig met uploaden...' : 'Klik om een bestand te selecteren'}</span>
-                    <span className="text-xs text-gray-400 mt-1">PDF, DOCX, PPTX, JPG of PNG</span>
+                  <label className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-cheetah-200/60 rounded-xl hover:border-cheetah-400/60 hover:bg-cheetah-50/50 transition-colors cursor-pointer">
+                    {uploading ? <Loader2 className="w-8 h-8 text-cheetah-400 animate-spin mb-2" /> : <Upload className="w-8 h-8 text-earth-300 mb-2" />}
+                    <span className="text-sm text-earth-500">{uploading ? 'Bezig met uploaden...' : 'Klik om een bestand te selecteren'}</span>
+                    <span className="text-xs text-earth-300 mt-1">PDF, DOCX, PPTX, JPG of PNG</span>
                     <input type="file" accept=".pdf,.docx,.pptx,.jpg,.jpeg,.png" onChange={handleFileUpload} className="hidden" disabled={uploading} />
                   </label>
                 )}
               </div>
 
               {error && (
-                <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-coral-600 bg-coral-50 p-3 rounded-lg">
                   {error}
                 </motion.p>
               )}

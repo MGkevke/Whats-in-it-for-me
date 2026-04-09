@@ -28,8 +28,10 @@ export default function Card({
       onClick={onClick}
       className={`
         rounded-2xl
-        ${glass ? 'glass' : 'bg-white border border-gray-100'}
-        ${hover ? 'hover:shadow-lg hover:shadow-gray-200/50 transition-shadow duration-300' : 'shadow-sm'}
+        ${glass
+          ? 'bg-white/60 backdrop-blur-lg border border-cheetah-200/30 shadow-lg'
+          : 'bg-white border border-cheetah-100/60 shadow-md shadow-cheetah-500/5'}
+        ${hover ? 'hover:shadow-xl hover:shadow-cheetah-500/10 hover:border-cheetah-200 transition-all duration-300' : ''}
         ${paddingClasses[padding]}
         ${className}
       `}

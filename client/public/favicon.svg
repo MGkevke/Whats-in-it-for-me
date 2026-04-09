@@ -1,10 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <rect width="64" height="64" rx="14" fill="#7C3AED"/>
-  <g transform="translate(12, 10)">
-    <path d="M20 4L2 12L20 20L38 12L20 4Z" fill="white" opacity="0.9"/>
-    <path d="M2 12V28L20 36V20L2 12Z" fill="white" opacity="0.7"/>
-    <path d="M38 12V28L20 36V20L38 12Z" fill="white" opacity="0.5"/>
-    <rect x="34" y="12" width="3" height="22" rx="1.5" fill="white" opacity="0.8"/>
-    <circle cx="35.5" cy="36" r="3" fill="white" opacity="0.8"/>
-  </g>
+  <rect width="64" height="64" rx="14" fill="url(#grad)"/>
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="64" y2="64">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <!-- Lightning bolt / Zap icon -->
+  <path d="M35 8L18 34h10l-4 22 17-26H31l4-22z" fill="white" opacity="0.95"/>
+  <!-- Cheetah spots -->
+  <circle cx="12" cy="14" r="3" fill="#92400E" opacity="0.3"/>
+  <circle cx="52" cy="50" r="3.5" fill="#92400E" opacity="0.25"/>
+  <circle cx="50" cy="14" r="2.5" fill="#92400E" opacity="0.2"/>
+  <circle cx="14" cy="50" r="2" fill="#92400E" opacity="0.25"/>
 </svg>

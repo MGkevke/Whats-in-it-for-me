@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BookOpen, GraduationCap, Sparkles, Loader2 } from 'lucide-react'
+import { BookOpen, GraduationCap, Sparkles, Loader2, Zap } from 'lucide-react'
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -12,7 +12,7 @@ export default function LandingPage() {
     try {
       await fetch('/api/seed-demo', { method: 'POST' })
     } catch {
-      // ignore - demo data might already exist
+      // ignore
     }
     setLoadingDemo(false)
     navigate('/teacher/dashboard')
@@ -25,32 +25,35 @@ export default function LandingPage() {
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
     >
-      {/* Animated background shapes */}
+      {/* Warm savanna gradient background */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-white to-indigo-100" />
-        {[...Array(6)].map((_, i) => (
+        <div className="absolute inset-0 bg-gradient-to-br from-cheetah-50 via-primary-50 to-savanna-50" />
+        {/* Cheetah spot decorations */}
+        <div className="absolute inset-0 spot-decoration opacity-40" />
+        {/* Warm animated blobs */}
+        {[...Array(5)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full opacity-20"
+            className="absolute rounded-full"
             style={{
-              width: 100 + i * 60,
-              height: 100 + i * 60,
+              width: 120 + i * 80,
+              height: 120 + i * 80,
               background: i % 2 === 0
-                ? 'radial-gradient(circle, #7C3AED 0%, transparent 70%)'
-                : 'radial-gradient(circle, #6366F1 0%, transparent 70%)',
-              left: `${10 + i * 15}%`,
-              top: `${20 + (i % 3) * 25}%`,
+                ? 'radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)',
+              left: `${5 + i * 18}%`,
+              top: `${15 + (i % 3) * 25}%`,
             }}
             animate={{
-              y: [0, -20, 0],
-              x: [0, 10, 0],
-              scale: [1, 1.1, 1],
+              y: [0, -25, 0],
+              x: [0, 15, 0],
+              scale: [1, 1.15, 1],
             }}
             transition={{
-              duration: 5 + i * 1.5,
+              duration: 6 + i * 1.5,
               repeat: Infinity,
               ease: 'easeInOut',
-              delay: i * 0.5,
+              delay: i * 0.7,
             }}
           />
         ))}
@@ -69,20 +72,24 @@ export default function LandingPage() {
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15 }}
         >
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-            <BookOpen className="w-7 h-7 text-white" />
+          {/* Cheetah icon/logo */}
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cheetah-400 to-primary-500 flex items-center justify-center shadow-xl shadow-cheetah-500/30 relative">
+            <Zap className="w-8 h-8 text-white" />
+            {/* Spots on logo */}
+            <div className="absolute top-1 right-1 w-2 h-2 bg-earth-900/20 rounded-full" />
+            <div className="absolute bottom-2 left-1.5 w-1.5 h-1.5 bg-earth-900/15 rounded-full" />
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-            LesPrep
+          <h1 className="text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-earth-900 via-cheetah-700 to-primary-600 bg-clip-text text-transparent">
+            CheetaPrep
           </h1>
         </motion.div>
         <motion.p
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-lg md:text-xl text-gray-500 font-medium"
+          className="text-lg md:text-xl text-earth-500 font-medium tracking-wide"
         >
-          Maak elke les relevant
+          Snel. Scherp. Voorbereid.
         </motion.p>
       </motion.div>
 
@@ -95,15 +102,19 @@ export default function LandingPage() {
           whileHover={{ scale: 1.04, y: -4 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate('/teacher/create')}
-          className="flex-1 group relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg shadow-purple-500/10 border border-purple-100 hover:shadow-xl hover:shadow-purple-500/20 transition-shadow duration-300 cursor-pointer text-left"
+          className="flex-1 group relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg shadow-cheetah-500/10 border border-cheetah-200/50 hover:shadow-xl hover:shadow-cheetah-500/20 hover:border-cheetah-300 transition-all duration-300 cursor-pointer text-left overflow-hidden"
         >
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mb-5 shadow-md group-hover:shadow-lg transition-shadow">
-            <BookOpen className="w-8 h-8 text-white" />
+          {/* Subtle spot pattern on card */}
+          <div className="absolute inset-0 spot-decoration opacity-20" />
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cheetah-400 to-primary-500 flex items-center justify-center mb-5 shadow-md group-hover:shadow-lg transition-shadow">
+              <BookOpen className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-xl font-bold text-earth-900 mb-2">Ik ben docent</h2>
+            <p className="text-sm text-earth-400">
+              Maak een les aan en bekijk wat je studenten willen leren
+            </p>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Ik ben docent</h2>
-          <p className="text-sm text-gray-500">
-            Maak een les aan en bekijk wat je studenten willen leren
-          </p>
         </motion.button>
 
         <motion.button
@@ -113,15 +124,18 @@ export default function LandingPage() {
           whileHover={{ scale: 1.04, y: -4 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate('/student/join')}
-          className="flex-1 group relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg shadow-indigo-500/10 border border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/20 transition-shadow duration-300 cursor-pointer text-left"
+          className="flex-1 group relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg shadow-primary-500/10 border border-primary-200/50 hover:shadow-xl hover:shadow-primary-500/20 hover:border-primary-300 transition-all duration-300 cursor-pointer text-left overflow-hidden"
         >
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center mb-5 shadow-md group-hover:shadow-lg transition-shadow">
-            <GraduationCap className="w-8 h-8 text-white" />
+          <div className="absolute inset-0 spot-decoration opacity-20" />
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-400 to-cheetah-600 flex items-center justify-center mb-5 shadow-md group-hover:shadow-lg transition-shadow">
+              <GraduationCap className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-xl font-bold text-earth-900 mb-2">Ik ben student</h2>
+            <p className="text-sm text-earth-400">
+              Bereid je voor op de les en geef aan wat je wilt leren
+            </p>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Ik ben student</h2>
-          <p className="text-sm text-gray-500">
-            Bereid je voor op de les en geef aan wat je wilt leren
-          </p>
         </motion.button>
       </div>
 
@@ -134,15 +148,18 @@ export default function LandingPage() {
         whileTap={{ scale: 0.95 }}
         onClick={handleDemo}
         disabled={loadingDemo}
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-cheetah-100 to-primary-100 hover:from-cheetah-200 hover:to-primary-200 text-earth-700 text-sm font-semibold transition-all disabled:opacity-50 shadow-sm"
       >
         {loadingDemo ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-4 h-4 text-cheetah-600" />
         )}
         Demo bekijken
       </motion.button>
+
+      {/* Bottom decoration - cheetah speed lines */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cheetah-400/30 to-transparent" />
     </motion.div>
   )
 }

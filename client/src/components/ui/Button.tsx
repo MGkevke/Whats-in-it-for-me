@@ -11,11 +11,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<string, string> = {
-  primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/25',
-  secondary: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-sm',
-  success: 'bg-success-600 hover:bg-success-700 text-white shadow-lg shadow-success-500/25',
+  primary: 'bg-gradient-to-r from-primary-500 to-cheetah-500 hover:from-primary-600 hover:to-cheetah-600 text-white shadow-lg shadow-primary-500/25',
+  secondary: 'bg-white hover:bg-cheetah-50 text-earth-700 border border-cheetah-200 shadow-sm',
+  success: 'bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white shadow-lg shadow-success-500/25',
   danger: 'bg-coral-600 hover:bg-coral-700 text-white shadow-lg shadow-coral-500/25',
-  ghost: 'bg-transparent hover:bg-gray-100 text-gray-600',
+  ghost: 'bg-transparent hover:bg-cheetah-50 text-earth-600',
 };
 
 const sizeClasses: Record<string, string> = {
@@ -40,8 +40,8 @@ export default function Button({
       whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
       className={`
         inline-flex items-center justify-center gap-2 font-semibold
-        transition-colors duration-200 focus:outline-none focus:ring-2
-        focus:ring-primary-500 focus:ring-offset-2
+        transition-all duration-200 focus:outline-none focus:ring-2
+        focus:ring-cheetah-400 focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variantClasses[variant]}
         ${sizeClasses[size]}

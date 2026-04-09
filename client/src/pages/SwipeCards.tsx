@@ -3,11 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import { Check, X, Loader2 } from 'lucide-react'
 
-interface CardItem {
-  stelling: string
-  correct: boolean
-  uitleg: string
-}
+interface CardItem { stelling: string; correct: boolean; uitleg: string }
 
 export default function SwipeCards() {
   const { id } = useParams<{ id: string }>()
@@ -23,9 +19,7 @@ export default function SwipeCards() {
   useEffect(() => {
     fetch(`/api/lessons/${id}`)
       .then(r => r.ok ? r.json() : null)
-      .then(lesson => {
-        if (lesson?.cards_json) setCards(JSON.parse(lesson.cards_json))
-      })
+      .then(lesson => { if (lesson?.cards_json) setCards(JSON.parse(lesson.cards_json)) })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [id])
@@ -38,11 +32,7 @@ export default function SwipeCards() {
     setCardResults(newResults)
     setLastResult({ understood, card })
     setExiting(direction)
-
-    setTimeout(() => {
-      setExiting(null)
-      setShowExplanation(true)
-    }, 300)
+    setTimeout(() => { setExiting(null); setShowExplanation(true) }, 300)
   }
 
   const dismissExplanation = () => {
@@ -50,7 +40,6 @@ export default function SwipeCards() {
     setLastResult(null)
     const nextIndex = currentIndex + 1
     setCurrentIndex(nextIndex)
-
     if (nextIndex >= cards.length) {
       sessionStorage.setItem('cardResults', JSON.stringify(cardResults))
       setTimeout(() => navigate(`/student/lesson/${id}/wishes`), 800)
@@ -64,19 +53,21 @@ export default function SwipeCards() {
     }
   }, [showExplanation])
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 text-purple-600 animate-spin" /></div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 text-cheetah-500 animate-spin" /></div>
 
   const isComplete = currentIndex >= cards.length
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
-      {/* Progress dots */}
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative">
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-cheetah-50 via-primary-50 to-savanna-50" />
+      <div className="absolute inset-0 -z-10 spot-decoration opacity-20" />
+
       <div className="flex gap-2 mb-8">
         {cards.map((_, i) => (
           <motion.div key={i}
             className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              i < currentIndex ? 'bg-purple-600' : i === currentIndex ? 'bg-purple-400 scale-125' : 'bg-gray-200'
+              i < currentIndex ? 'bg-cheetah-500' : i === currentIndex ? 'bg-cheetah-400' : 'bg-earth-200'
             }`}
             animate={i === currentIndex ? { scale: [1, 1.3, 1] } : {}}
             transition={{ duration: 1, repeat: Infinity }}
@@ -84,24 +75,20 @@ export default function SwipeCards() {
         ))}
       </div>
 
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-earth-400 mb-6">
         {isComplete ? 'Klaar!' : `${currentIndex + 1} / ${cards.length}`}
       </p>
 
-      {/* Card stack */}
       <div className="relative w-80 h-96 mb-8">
         <AnimatePresence>
           {!isComplete && cards.map((card, i) => {
             if (i < currentIndex || i > currentIndex + 1) return null
-            if (i === currentIndex) {
-              return <SwipeableCard key={i} card={card} onSwipe={handleSwipe} isTop exiting={exiting} />
-            }
+            if (i === currentIndex) return <SwipeableCard key={i} card={card} onSwipe={handleSwipe} isTop exiting={exiting} />
             return (
               <motion.div key={i}
-                className="absolute inset-0 bg-white rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center p-8"
-                style={{ scale: 0.95, y: 10 }}
-              >
-                <p className="text-lg text-center text-gray-300 font-medium">{card.stelling}</p>
+                className="absolute inset-0 bg-white rounded-2xl shadow-lg border border-cheetah-100/60 flex items-center justify-center p-8"
+                style={{ scale: 0.95, y: 10 }}>
+                <p className="text-lg text-center text-earth-200 font-medium">{card.stelling}</p>
               </motion.div>
             )
           })}
@@ -111,50 +98,43 @@ export default function SwipeCards() {
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
             className="absolute inset-0 flex flex-col items-center justify-center">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200 }}
-              className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-4">
-              <Check className="w-12 h-12 text-green-600" />
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-cheetah-100 to-primary-100 flex items-center justify-center mb-4 shadow-lg">
+              <Check className="w-12 h-12 text-cheetah-600" />
             </motion.div>
-            <p className="text-xl font-bold text-gray-900">Goed gedaan!</p>
+            <p className="text-xl font-bold text-earth-900">Goed gedaan!</p>
           </motion.div>
         )}
       </div>
 
-      {/* Desktop buttons */}
       {!isComplete && !showExplanation && (
         <div className="flex gap-6">
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
             onClick={() => handleSwipe('left')}
-            className="w-16 h-16 rounded-full bg-red-100 hover:bg-red-200 flex items-center justify-center transition-colors shadow-lg">
-            <X className="w-8 h-8 text-red-500" />
+            className="w-16 h-16 rounded-full bg-coral-100 hover:bg-coral-200 flex items-center justify-center transition-colors shadow-lg">
+            <X className="w-8 h-8 text-coral-500" />
           </motion.button>
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
             onClick={() => handleSwipe('right')}
-            className="w-16 h-16 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors shadow-lg">
-            <Check className="w-8 h-8 text-green-500" />
+            className="w-16 h-16 rounded-full bg-success-100 hover:bg-success-200 flex items-center justify-center transition-colors shadow-lg">
+            <Check className="w-8 h-8 text-success-500" />
           </motion.button>
         </div>
       )}
 
-      {/* Explanation overlay */}
       <AnimatePresence>
         {showExplanation && lastResult && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            onClick={dismissExplanation}
-            className="fixed bottom-8 left-4 right-4 max-w-md mx-auto z-50 cursor-pointer"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            onClick={dismissExplanation} className="fixed bottom-8 left-4 right-4 max-w-md mx-auto z-50 cursor-pointer">
             <div className={`p-4 rounded-2xl shadow-xl border-2 ${
-              lastResult.card.correct ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+              lastResult.card.correct ? 'bg-success-50 border-success-200' : 'bg-coral-50 border-coral-200'
             }`}>
               <div className="flex items-center gap-2 mb-2">
-                <span className={`text-sm font-semibold ${lastResult.card.correct ? 'text-green-700' : 'text-red-700'}`}>
+                <span className={`text-sm font-semibold ${lastResult.card.correct ? 'text-success-700' : 'text-coral-700'}`}>
                   {lastResult.card.correct ? 'Juist!' : 'Onjuist!'}
                 </span>
               </div>
-              <p className="text-sm text-gray-600">{lastResult.card.uitleg}</p>
-              <p className="text-xs text-gray-400 mt-2">Tik om door te gaan</p>
+              <p className="text-sm text-earth-600">{lastResult.card.uitleg}</p>
+              <p className="text-xs text-earth-300 mt-2">Tik om door te gaan</p>
             </div>
           </motion.div>
         )}
@@ -164,10 +144,7 @@ export default function SwipeCards() {
 }
 
 function SwipeableCard({ card, onSwipe, isTop, exiting }: {
-  card: CardItem
-  onSwipe: (dir: 'left' | 'right') => void
-  isTop: boolean
-  exiting: 'left' | 'right' | null
+  card: CardItem; onSwipe: (dir: 'left' | 'right') => void; isTop: boolean; exiting: 'left' | 'right' | null
 }) {
   const x = useMotionValue(0)
   const rotate = useTransform(x, [-200, 200], [-15, 15])
@@ -178,11 +155,7 @@ function SwipeableCard({ card, onSwipe, isTop, exiting }: {
     <motion.div
       className="absolute inset-0 cursor-grab active:cursor-grabbing"
       style={isTop && !exiting ? { x, rotate } : undefined}
-      animate={exiting ? {
-        x: exiting === 'left' ? -600 : 600,
-        rotate: exiting === 'left' ? -30 : 30,
-        opacity: 0,
-      } : undefined}
+      animate={exiting ? { x: exiting === 'left' ? -600 : 600, rotate: exiting === 'left' ? -30 : 30, opacity: 0 } : undefined}
       transition={exiting ? { duration: 0.3 } : undefined}
       drag={isTop && !exiting ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -192,28 +165,29 @@ function SwipeableCard({ card, onSwipe, isTop, exiting }: {
         else if (info.offset.x < -100) onSwipe('left')
       }}
     >
-      <div className="w-full h-full bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col items-center justify-center p-8 relative overflow-hidden">
-        {/* Swipe hints */}
+      <div className="w-full h-full bg-white rounded-2xl shadow-2xl border border-cheetah-100/60 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        {/* Cheetah spot decoration on card */}
+        <div className="absolute inset-0 spot-decoration opacity-10" />
+        {/* Top accent */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cheetah-400 to-primary-500 rounded-t-2xl" />
+
         <motion.div style={{ opacity: leftOpacity }}
-          className="absolute inset-0 bg-red-500/10 flex items-center justify-center rounded-2xl pointer-events-none">
-          <div className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-lg rotate-[-20deg]">
+          className="absolute inset-0 bg-coral-500/10 flex items-center justify-center rounded-2xl pointer-events-none">
+          <div className="bg-coral-500 text-white px-4 py-2 rounded-full font-bold text-lg rotate-[-20deg]">
             <X className="w-6 h-6 inline mr-1" /> Snap ik niet
           </div>
         </motion.div>
         <motion.div style={{ opacity: rightOpacity }}
-          className="absolute inset-0 bg-green-500/10 flex items-center justify-center rounded-2xl pointer-events-none">
-          <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-lg rotate-[20deg]">
+          className="absolute inset-0 bg-success-500/10 flex items-center justify-center rounded-2xl pointer-events-none">
+          <div className="bg-success-500 text-white px-4 py-2 rounded-full font-bold text-lg rotate-[20deg]">
             <Check className="w-6 h-6 inline mr-1" /> Snap ik!
           </div>
         </motion.div>
 
-        <p className="text-xl md:text-2xl font-medium text-gray-800 text-center leading-relaxed relative z-10">
+        <p className="text-xl md:text-2xl font-medium text-earth-800 text-center leading-relaxed relative z-10">
           {card.stelling}
         </p>
-
-        <p className="text-xs text-gray-400 absolute bottom-4">
-          Swipe of gebruik de knoppen
-        </p>
+        <p className="text-xs text-earth-300 absolute bottom-4">Swipe of gebruik de knoppen</p>
       </div>
     </motion.div>
   )

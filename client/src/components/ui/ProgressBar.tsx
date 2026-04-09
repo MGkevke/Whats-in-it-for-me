@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface ProgressBarProps {
   value: number;
-  color?: 'purple' | 'green' | 'coral';
+  color?: 'cheetah' | 'green' | 'coral';
   showPercent?: boolean;
   variant?: 'bar' | 'dots';
   steps?: number;
@@ -11,20 +11,26 @@ interface ProgressBarProps {
 }
 
 const colorClasses: Record<string, string> = {
-  purple: 'bg-primary-500',
-  green: 'bg-success-500',
-  coral: 'bg-coral-500',
+  cheetah: 'bg-gradient-to-r from-primary-400 to-cheetah-500',
+  green: 'bg-gradient-to-r from-success-400 to-success-500',
+  coral: 'bg-gradient-to-r from-coral-400 to-coral-500',
 };
 
 const trackColors: Record<string, string> = {
-  purple: 'bg-primary-100',
+  cheetah: 'bg-cheetah-100',
   green: 'bg-success-100',
   coral: 'bg-coral-100',
 };
 
+const dotActiveColors: Record<string, string> = {
+  cheetah: 'bg-cheetah-500',
+  green: 'bg-success-500',
+  coral: 'bg-coral-500',
+};
+
 export default function ProgressBar({
   value,
-  color = 'purple',
+  color = 'cheetah',
   showPercent = false,
   variant = 'bar',
   steps,
@@ -37,7 +43,7 @@ export default function ProgressBar({
           <div
             key={i}
             className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${
-              i <= currentStep ? colorClasses[color] : 'bg-gray-200'
+              i <= currentStep ? dotActiveColors[color] : 'bg-earth-200'
             }`}
           />
         ))}
@@ -56,7 +62,7 @@ export default function ProgressBar({
         />
       </div>
       {showPercent && (
-        <span className="text-sm font-medium text-gray-600 min-w-[3ch] text-right">
+        <span className="text-sm font-medium text-earth-600 min-w-[3ch] text-right">
           {Math.round(value)}%
         </span>
       )}

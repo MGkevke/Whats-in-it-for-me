@@ -7,16 +7,53 @@ export default {
     extend: {
       colors: {
         primary: {
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          200: '#DDD6FE',
-          300: '#C4B5FD',
-          400: '#A78BFA',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
-          800: '#5B21B6',
-          900: '#4C1D95',
+          50: '#FFF8F0',
+          100: '#FFEDD5',
+          200: '#FED7AA',
+          300: '#FDBA74',
+          400: '#FB923C',
+          500: '#F97316',
+          600: '#EA580C',
+          700: '#C2410C',
+          800: '#9A3412',
+          900: '#7C2D12',
+        },
+        cheetah: {
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          200: '#FDE68A',
+          300: '#FCD34D',
+          400: '#FBBF24',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
+          800: '#92400E',
+          900: '#78350F',
+          spot: '#3D2B1F',
+        },
+        savanna: {
+          50: '#FEFCE8',
+          100: '#FEF9C3',
+          200: '#FEF08A',
+          300: '#FDE047',
+          400: '#FACC15',
+          500: '#EAB308',
+          600: '#CA8A04',
+          700: '#A16207',
+          800: '#854D0E',
+          900: '#713F12',
+        },
+        earth: {
+          50: '#FAF5F0',
+          100: '#F0E6D8',
+          200: '#E0CCAF',
+          300: '#CDB08A',
+          400: '#B8936A',
+          500: '#A07850',
+          600: '#8B6340',
+          700: '#724F34',
+          800: '#5C3F2B',
+          900: '#3D2B1F',
         },
         coral: {
           50: '#FFF5F5',
@@ -46,6 +83,10 @@ export default {
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
+      backgroundImage: {
+        'cheetah-spots': `radial-gradient(circle 3px, #3D2B1F 100%, transparent 100%)`,
+        'savanna-gradient': 'linear-gradient(135deg, #FFF8F0 0%, #FEF3C7 30%, #FFEDD5 60%, #FFF8F0 100%)',
+      },
       animation: {
         'slide-up': 'slideUp 0.5s ease-out',
         'slide-down': 'slideDown 0.5s ease-out',
@@ -54,6 +95,7 @@ export default {
         'bounce-in': 'bounceIn 0.6s ease-out',
         'scale-in': 'scaleIn 0.3s ease-out',
         'spin-slow': 'spin 3s linear infinite',
+        'pulse-warm': 'pulseWarm 3s ease-in-out infinite',
       },
       keyframes: {
         slideUp: {
@@ -81,6 +123,10 @@ export default {
         scaleIn: {
           '0%': { transform: 'scale(0.9)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        pulseWarm: {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.7' },
         },
       },
     },

@@ -1,17 +1,18 @@
 import React from 'react';
 
 interface BadgeProps {
-  variant?: 'primary' | 'success' | 'warning' | 'info' | 'neutral';
+  variant?: 'primary' | 'success' | 'warning' | 'info' | 'neutral' | 'danger';
   size?: 'sm' | 'md';
   children: React.ReactNode;
 }
 
 const variantClasses: Record<string, string> = {
-  primary: 'bg-primary-100 text-primary-700',
+  primary: 'bg-cheetah-100 text-cheetah-800',
   success: 'bg-success-100 text-success-700',
   warning: 'bg-amber-100 text-amber-700',
   info: 'bg-blue-100 text-blue-700',
-  neutral: 'bg-gray-100 text-gray-600',
+  neutral: 'bg-earth-100 text-earth-600',
+  danger: 'bg-coral-100 text-coral-700',
 };
 
 const sizeClasses: Record<string, string> = {
